@@ -38,7 +38,8 @@ export default function App() {
     return (
       <BrowserRouter>
         <Routes>
-            <Route path="*" element={<Navigate to="/malik" replace />} />
+          {owner('/malik', 'remote')}
+          <Route path="*" element={<Navigate to="/malik" replace />} />
         </Routes>
       </BrowserRouter>
     )
