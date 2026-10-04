@@ -4,9 +4,24 @@ import { api } from '../../lib/api'
 import { handle } from '../../lib/engine'
 import { buildDigest, localSummary, SUMMARY_WORDS } from '../../lib/digest'
 import { askSaathi, probeLLM } from '../../lib/llm'
-import { addLog, getState, undoLast, useStore } from '../../lib/store'
+import { addLog, flushPush, getState, syncStatus, undoLast, useStore } from '../../lib/store'
 import { speak, useVoice, voiceSupported } from '../../lib/voice'
 import type { Outcome, Payment } from '../../lib/types'
+
+// Words an AI reply uses when it says a write happened. Only the engine's cards may claim that.
+const CLAIM = /(add (kar|ho)|likh (diya|liya|di|dia)|note (kar|ho)|daal (diya|di)|jod (diya|di)|ban (gaya|gayi|diya)|khol (diya|di)|save (kar|ho)|update (kar|ho)|kar diya|kar di\b|ho gaya|ho gayi|\bdone\b)/i
+
+/** Read the saved shop back from the server so "likh diya" is never claimed unless it really landed. */
+async function verifySaved(): Promise<string | null> {
+  await flushPush()
+  if (syncStatus.error) return 'Server pe save NAHI hua (' + syncStatus.error + '). Page refresh karke dobara try karo.'
+  try {
+    const r = await api.getState()
+    const mine = getState()
+    if (!r.state || r.state.customers.length !== mine.customers.length || r.state.ledger.length !== mine.ledger.length || r.state.sales.length !== mine.sales.length) return 'Server pe save NAHI hua. Page refresh karke dobara try karo.'
+  } catch (e) { return 'Save check nahi ho paya (' + (e as Error).message + ').' }
+  return null
+}
 
 type Msg = { id: number; who: 'me' | 'bot'; text: string; out?: Outcome; undone?: boolean }
 let thread: Msg[] = []
@@ -38,21 +53,37 @@ export default function Saathi() {
     let payments: Payment[] = []
     if (!demo) { try { payments = (await api.payments()).payments } catch { /* digest works without it */ } }
     const digest = buildDigest(getState(), payments)
-    try {
-      const r = await askSaathi(q, digest, history, getState())
-      add({ who: 'bot', text: r.reply })
-      speak(r.reply)
-      for (const a of r.actions || []) {
+    const run = async (cmds: string[]) => {
+      for (const a of cmds) {
         const out = await handle(a)
         add({ who: 'bot', text: out.reply.text, out })
+      }
+      if (!demo) {
+        const bad = await verifySaved()
+        add({ who: 'bot', text: bad ?? 'Server pe save ho gaya ✓' })
+      }
+    }
+    try {
+      const r = await askSaathi(q, digest, history, getState())
+      const acts = r.actions || []
+      if (acts.length) {
+        // The engine's cards are the only proof of a write; the AI's own sentence is not shown.
+        await run(acts)
+      } else if (CLAIM.test(r.reply)) {
+        // AI said it wrote something but sent no command. Try the real engine instead of repeating the claim.
+        const out = await handle(q)
+        if (out.ok && out.card?.undoable) { add({ who: 'bot', text: out.reply.text, out }); if (!demo) { const bad = await verifySaved(); add({ who: 'bot', text: bad ?? 'Server pe save ho gaya ✓' }) } }
+        else add({ who: 'bot', text: 'Abhi kuch likha NAHI gaya. Poora likho, jaise: "Raju ka 200 udhaar likh do" ya "Sunita ne 200 diye".' })
+      } else {
+        add({ who: 'bot', text: r.reply })
+        speak(r.reply)
       }
     } catch {
       // Model not reachable: still do the job with the offline parser and plain facts.
       if (SUMMARY_WORDS.test(q) && !/\d/.test(q)) {
         add({ who: 'bot', text: localSummary(getState(), payments) })
       } else {
-        const out = await handle(q)
-        add({ who: 'bot', text: out.reply.text, out })
+        await run([q])
       }
     }
     setBusy(false)
