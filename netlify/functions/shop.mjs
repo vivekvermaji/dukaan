@@ -120,11 +120,18 @@ async function handle(req) {
     // ---- owner only ----
     if (!authed(req)) return json({ error: 'Login chahiye.' }, 401)
 
-    if (op === 'state' && req.method === 'GET') return json({ state: (await s.get('state', { type: 'json' })) || null })
+    if (op === 'state' && req.method === 'GET') {
+      const rev = Number(await s.get('state-rev')) || 0
+      return json({ state: (await s.get('state', { type: 'json' })) || null, rev })
+    }
     if (op === 'state' && req.method === 'PUT') {
       if (!body.state || !Array.isArray(body.state.customers)) return json({ error: 'bad state' }, 400)
+      // Optimistic lock: a device with an old copy must not overwrite newer data from another device.
+      const rev = Number(await s.get('state-rev')) || 0
+      if (Number(body.rev) !== rev) return json({ error: 'conflict', state: (await s.get('state', { type: 'json' })) || null, rev }, 409)
       await s.setJSON('state', body.state)
-      return json({ ok: true })
+      await s.set('state-rev', String(rev + 1))
+      return json({ ok: true, rev: rev + 1 })
     }
     if (op === 'photo') { const ph = await s.get('photo/' + String(url.searchParams.get('id') || '').replace(/[^a-z0-9-]/gi, '')); return ph ? json({ photo: ph }) : json({ error: 'no photo' }, 404) }
     if (op === 'payments') return json({ payments: ((await s.get('payments', { type: 'json' })) || []).sort((a, b) => b.ts - a.ts) })
