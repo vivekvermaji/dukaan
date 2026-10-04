@@ -165,7 +165,7 @@ function execute(intent: Intent, source: 'rules' | 'llm'): Outcome {
       const id = 'c-' + uid()
       pushSnapshot()
       mutate((d) => {
-        d.customers.push({ id, name, hi: name, aliases: [intent.name.toLowerCase()], balance: 0, since: Date.now() })
+        d.customers.push({ id, name, hi: name, aliases: [intent.name.toLowerCase()], balance: 0, since: Date.now(), phone: '', code: String(1000 + Math.floor(Math.random() * 9000)) })
       })
       const r = execute({ type: intent.then, customerId: id, amount: intent.amount } as Intent, source)
       r.reply.text = `Naya khata khola: ${name}. ` + r.reply.text
