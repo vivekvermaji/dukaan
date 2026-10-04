@@ -4,7 +4,7 @@
 import { getStore } from '@netlify/blobs'
 import crypto from 'node:crypto'
 
-const store = () => getStore('dukaan')
+const store = () => getStore({ name: 'dukaan', consistency: 'strong' })
 const json = (o, status = 200) =>
   new Response(JSON.stringify(o), { status, headers: { 'content-type': 'application/json', 'cache-control': 'no-store' } })
 
