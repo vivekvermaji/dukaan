@@ -40,7 +40,24 @@ async function findCustomer(phone, code) {
   return c ? { st, c } : null
 }
 
+const cors = (req, res) => {
+  const o = req.headers.get('origin') || ''
+  const ok = (process.env.ALLOWED_ORIGIN || '').split(',').map((x) => x.trim()).filter(Boolean)
+  if (o && ok.includes(o)) {
+    res.headers.set('access-control-allow-origin', o)
+    res.headers.set('access-control-allow-headers', 'content-type, authorization')
+    res.headers.set('access-control-allow-methods', 'GET, POST, PUT, OPTIONS')
+    res.headers.set('vary', 'origin')
+  }
+  return res
+}
+
 export default async (req) => {
+  if (req.method === 'OPTIONS') return cors(req, new Response(null, { status: 204 }))
+  return cors(req, await handle(req))
+}
+
+async function handle(req) {
   const url = new URL(req.url)
   const op = url.searchParams.get('op') || ''
   const ip = req.headers.get('x-nf-client-connection-ip') || req.headers.get('x-forwarded-for') || 'unknown'
