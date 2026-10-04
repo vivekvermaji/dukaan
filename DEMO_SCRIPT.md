@@ -1,11 +1,12 @@
 # Demo video script (under 3 minutes)
 
-1. (0:00) Landing page. One line: kirana owners have busy hands, Dukaan is a voice agent that keeps the books.
-2. (0:15) Open /app. Say "2 doodh aur 1 bread becho". Show the action card and the reply.
-3. (0:35) Say "Ramesh ka 500 udhaar likh do". Agent asks which Ramesh. Say "Gupta".
-4. (0:55) Say "Sunita ne 200 diye". Then "aaj kitni sale hui?".
-5. (1:15) Say "kya khatam ho raha hai?" then "50 packet Maggi aaya".
-6. (1:35) Say "wo wapas karo" to show Undo.
-7. (1:45) Open /admin. Show the dashboard already reflecting everything just said, then khata and stock.
-8. (2:20) Open /admin/log: every command, what was understood, offline parser vs AI model.
-9. (2:35) Close: free tools only, works in Hindi, Hinglish and Devanagari, open source.
+Use two browser tabs: the owner area (`/malik`, logged in) and the public site on a phone-sized window.
+
+1. (0:00) Public site `/`. One line: the shopkeeper's customers can see their own khata, and pay, without the owner's phone.
+2. (0:15) `/hisaab`: enter phone and khata code of a customer. Show balance, items taken, entries.
+3. (0:35) Owner tab, `/malik/voice`. Say "2 doodh aur 1 bread becho", then "Ramesh ka 500 udhaar likh do" ("Gupta" when asked which Ramesh).
+4. (1:05) Reload the customer's `/hisaab`: the new udhaar is already there. Same data, both sides.
+5. (1:20) `/pay` on the phone window: show the QR, Pay now, enter a 12-digit UTR, submit. Status: owner confirmation pending.
+6. (1:45) Owner tab, Payments: the pending payment with its UTR. Tap "Paisa aa gaya". Customer page updates to confirmed, balance goes down. Say plainly: no gateway, so the owner confirms against the bank, and the khata never drops by itself.
+7. (2:15) Owner: Lana hai list (low stock items added with one tap), Print QR poster.
+8. (2:35) Close: free tools only, Hindi, Hinglish and Devanagari, open source, gateway upgrade path in docs/PRODUCTION.md.
