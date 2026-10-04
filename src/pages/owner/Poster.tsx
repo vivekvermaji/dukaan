@@ -5,7 +5,7 @@ import { api } from '../../lib/api'
 export default function Poster() {
   const [qr, setQr] = useState('')
   const [shop, setShop] = useState('Dukaan')
-  const url = `${location.origin}/pay`
+  const url = `${import.meta.env.VITE_PUBLIC_URL || location.origin}/pay`
   useEffect(() => {
     api.config().then((c) => setShop(c.shop || 'Dukaan')).catch(() => {})
     QRCode.toDataURL(url, { margin: 1, width: 720, color: { dark: '#000000', light: '#ffffff' } }).then(setQr)
