@@ -1,10 +1,14 @@
 import { useState } from 'react'
-import { useStore, mutate, pushSnapshot, uid, addLog } from '../lib/store'
+import { useStore, mutate, pushSnapshot, uid, addLog, flushPush } from '../lib/store'
 import { rupee } from '../lib/engine'
 import { clock } from '../lib/hooks'
 
+type Edit = { id: string; customerId: string; amount: string; note: string; date: string }
+const ymd = (ts: number) => { const d = new Date(ts); return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}` }
+
 export default function Khata() {
   const s = useStore()
+  const [edit, setEdit] = useState<Edit | null>(null)
   const [open, setOpen] = useState<string | null>(null)
   const [q, setQ] = useState('')
   const [name, setName] = useState('')
@@ -21,6 +25,33 @@ export default function Khata() {
       d.ledger.push({ id: uid(), ts: Date.now(), customerId: id, amount: -c.balance, kind: 'payment', note: 'Admin panel se' })
     })
     addLog({ utterance: '(admin panel)', intent: 'payment', reply: `${c.name} ka khata saaf`, ok: true, source: 'system', undoable: true })
+  }
+  const saveEdit = (e0: { id: string; ts: number; amount: number; customerId: string }) => {
+    if (!edit) return
+    const v = Math.abs(Number(edit.amount))
+    if (!(v > 0)) return
+    const next = (e0.amount < 0 ? -1 : 1) * v
+    const [y, m, d] = edit.date.split('-').map(Number)
+    const dt = new Date(e0.ts); if (y && m && d) dt.setFullYear(y, m - 1, d)
+    pushSnapshot()
+    mutate((dr) => {
+      const le = dr.ledger.find((x) => x.id === e0.id)!
+      dr.customers.find((x) => x.id === e0.customerId)!.balance += next - le.amount
+      le.amount = next; le.note = edit.note.trim() || le.note; le.ts = dt.getTime()
+    })
+    addLog({ utterance: '(admin panel)', intent: 'edit', reply: 'Entry badli', ok: true, source: 'system', undoable: true })
+    setEdit(null)
+    void flushPush()
+  }
+  const delEntry = (e0: { id: string; amount: number; customerId: string }) => {
+    if (!window.confirm('Ye entry hata dein? Customer ka baaki bhi badal jayega.')) return
+    pushSnapshot()
+    mutate((dr) => {
+      dr.customers.find((x) => x.id === e0.customerId)!.balance -= e0.amount
+      dr.ledger = dr.ledger.filter((x) => x.id !== e0.id)
+    })
+    addLog({ utterance: '(admin panel)', intent: 'delete', reply: 'Entry hata di', ok: true, source: 'system', undoable: true })
+    void flushPush()
   }
   const addCustomer = (e: React.FormEvent) => {
     e.preventDefault()
@@ -58,11 +89,22 @@ export default function Khata() {
                     <span>Khata code (customer ko batao): <b>{c.code ?? '—'}</b></span>
                     <input placeholder="Phone number (10 ank)" inputMode="numeric" value={c.phone ?? ''} onChange={(e) => mutate((d) => { d.customers.find((x) => x.id === c.id)!.phone = e.target.value.replace(/\D/g, '').slice(-10) })} />
                   </div>
-                  {entries.map((e) => (
+                  {entries.map((e) => edit?.id === e.id ? (
+                    <div key={e.id} className="ledger-line editing">
+                      <input type="date" value={edit.date} onChange={(x) => setEdit({ ...edit, date: x.target.value })} />
+                      <input placeholder="Note" value={edit.note} onChange={(x) => setEdit({ ...edit, note: x.target.value })} />
+                      <input inputMode="decimal" placeholder="Rupaye" value={edit.amount} onChange={(x) => setEdit({ ...edit, amount: x.target.value.replace(/[^\d.]/g, '') })} />
+                      <span className="le-btns"><button className="btn sm" onClick={() => saveEdit(e)}>Save</button><button className="btn sm ghost" onClick={() => setEdit(null)}>Raho</button></span>
+                    </div>
+                  ) : (
                     <div key={e.id} className="ledger-line">
                       <span>{new Date(e.ts).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} · {clock(e.ts)}</span>
                       <span>{e.note ?? (e.kind === 'payment' ? 'Paisa mila' : 'Udhaar')}</span>
                       <b className={e.amount < 0 ? 'ok' : 'warn'}>{e.amount < 0 ? '−' : '+'}{rupee(Math.abs(e.amount))}</b>
+                      <span className="le-btns">
+                        <button className="link-btn" onClick={() => setEdit({ id: e.id, customerId: c.id, amount: String(Math.abs(e.amount)), note: e.note ?? '', date: ymd(e.ts) })}>Edit</button>
+                        <button className="link-btn danger" onClick={() => delEntry(e)}>Hatao</button>
+                      </span>
                     </div>
                   ))}
                   {entries.length === 0 && <div className="muted">Abhi koi entry nahi.</div>}
