@@ -1,3 +1,4 @@
+import { useBase } from '../lib/base'
 import { useEffect, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { handle, rupee, salesIn } from '../lib/engine'
@@ -14,6 +15,7 @@ let nid = 1
 const CHIPS = ['2 doodh aur 1 bread becho', 'Ramesh ka 500 udhaar likh do', 'Sunita ne 200 diye', 'aaj kitni sale hui?', 'kiska sabse zyada udhaar hai?', 'kya khatam ho raha hai?', '50 packet Maggi aaya', 'wo wapas karo']
 
 export default function Console() {
+  const base = useBase()
   const s = useStore()
   const [msgs, setMsgs] = useState<Msg[]>(thread)
   const [busy, setBusy] = useState(false)
@@ -53,9 +55,9 @@ export default function Console() {
     <div className="console">
       <div className="glow g1" /><div className="glow g2" />
       <header className="topnav slim">
-        <Link to="/" className="logo"><span className="logo-mark">द</span><span>Dukaan</span></Link>
+        <Link to={base} className="logo"><span className="logo-mark">द</span><span>Dukaan</span></Link>
         <nav>
-          <Link to="/admin">Admin panel →</Link>
+          <Link to={base}>Dashboard →</Link>
         </nav>
       </header>
       <div className="console-grid">
@@ -120,7 +122,7 @@ export default function Console() {
             <div><span className="dot ok" />Offline Hinglish parser: chalu</div>
             <div><span className={`dot ${llm ? 'ok' : 'off'}`} />AI model: {llm === null ? 'check ho raha…' : llm ? 'chalu' : 'band (parser se kaam chal raha)'}</div>
           </div>
-          <Link to="/admin" className="live-cta">Admin panel me live dekho →</Link>
+          <Link to={base} className="live-cta">Dashboard me live dekho →</Link>
         </aside>
       </div>
     </div>
