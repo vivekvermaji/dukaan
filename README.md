@@ -27,7 +27,7 @@ Devanagari works too: "रमेश का 500 उधार लिख दो", "
   1. An offline Hinglish parser (Hindi number words, "paanch sau", item and name fuzzy matching, ambiguity questions). Needs no key and no network.
   2. An LLM (OpenRouter free models) through a small serverless proxy, used when the parser is unsure. It returns a structured action; the app validates it against real items and customers before doing anything.
 - **Actions are real:** the agent changes the books (sales, udhaar ledger, stock). Every action is shown as a card and can be undone.
-- **Owner area:** `/malik` (PIN login, shared server data) and `/demo` (same screens on browser-only sample data, no login, for reviewers). Pages: dashboard, udhaar khata, payments, stock, "lana hai" shopping list, voice log, printable QR, settings. Nothing on the public site links to or mentions them.
+- **Owner panel:** a separate deployment of the same repo (build flag `VITE_APP=owner`), PIN login, talks to the public site's API so both share one data store. The public site has no owner routes. `/demo` on the public site (same screens on browser-only sample data, no login, for reviewers). Pages: dashboard, udhaar khata, payments, stock, "lana hai" shopping list, voice log, printable QR, settings. Nothing on the public site links to the owner panel.
 - **Public customer site:** `/` home, `/hisaab` (customer enters phone number plus the 4-digit khata code the owner gave them, then sees balance, items taken and every entry), `/pay` (UPI QR, "Pay now" deep link, UTR form).
 - **Shared data:** Netlify Functions + Netlify Blobs (free). The owner's voice commands write to the same data customers read. Customer lookups reveal only that one customer's record.
 
@@ -89,3 +89,8 @@ MIT. See [LICENSE](LICENSE).
 `/pay` par QR dikhne se pehle customer apni photo khinchta hai (device camera). Photo pending payment ke saath owner ke inbox (`/malik/payments`) me dikhti hai, taaki fake payment par pehchaan ho sake. UTR submit hone ke baad "Thank you sir, visit our shop again" screen aati hai.
 
 Privacy note: photo sirf owner ke liye server par rakhi jaati hai. Auto-delete abhi nahi hai, to payment confirm hone ke baad owner ko purani photos khud hata deni chahiye. Production me customer ko batakar consent lena aur retention limit lagana chahiye.
+
+## Do sites: public + owner panel
+
+1. Public site: deploy this repo normally. Env vars: `ADMIN_PIN`, `OPENROUTER_API_KEY`, `OPENROUTER_MODELS`, and `ALLOWED_ORIGIN` (the owner panel's URL, e.g. `https://your-panel.netlify.app`).
+2. Owner panel: create a second Netlify site from the same repo with env vars `VITE_APP=owner`, `VITE_API_BASE=https://<public-site>`, `VITE_PUBLIC_URL=https://<public-site>`, `VITE_API_URL=https://<public-site>/api/agent`. Share its URL only with the owner. Login with `ADMIN_PIN` at `/malik`.
