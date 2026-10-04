@@ -178,6 +178,77 @@ small{color:var(--mut);display:block;font-size:12px}
 .pill.ghost{background:var(--s3);color:var(--mut)} .pill.bad{background:rgba(255,107,107,.15);color:var(--bad)} .pill.warn{background:rgba(255,180,84,.15);color:var(--warn)}
 .log-said{font-weight:600} .log-reply{color:var(--mut);font-size:14px}
 
+/* ---- public customer pages + owner extras ---- */
+.pub{position:relative;max-width:1000px;margin:0 auto;padding:30px clamp(16px,4vw,40px) 80px}
+.pub h1{font-family:'Instrument Serif',serif;font-weight:400;font-size:clamp(38px,6vw,60px);margin:6px 0 10px}
+.pub .lead{color:var(--mut);max-width:560px;margin:0 0 26px}
+.pub-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.narrow{max-width:440px}
+.form-stack{display:flex;flex-direction:column;gap:14px;padding:22px}
+.form-stack label,.amt{display:flex;flex-direction:column;gap:6px;font-size:13px;color:var(--mut)}
+.form-stack input,.amt input,.gate-card input,.inline-form input,.contact-row input{background:var(--s2);border:1px solid var(--line2);border-radius:12px;padding:12px 14px;color:var(--tx);font:inherit;outline:0;min-width:0}
+.form-stack input:focus,.amt input:focus,.gate-card input:focus,.inline-form input:focus{border-color:var(--acc)}
+.form-stack hr{border:0;border-top:1px solid var(--line);width:100%}
+.err{color:var(--bad);font-size:14px;background:rgba(255,107,107,.08);border:1px solid rgba(255,107,107,.25);border-radius:12px;padding:10px 12px}
+.note{background:rgba(255,180,84,.08);border:1px solid rgba(255,180,84,.3);color:var(--acc2);border-radius:14px;padding:12px 16px;margin:14px 0;font-size:14px}
+.bal-card{display:flex;align-items:center;justify-content:space-between;gap:18px;flex-wrap:wrap;background:var(--s1);border:1px solid var(--line);border-radius:24px;padding:22px 26px;margin-bottom:16px}
+.bal-card h2{font-family:'Instrument Serif',serif;font-weight:400;font-size:34px;margin:2px 0 0}
+.bal-card small{color:var(--mut);display:block}
+.bal b{font-family:'Instrument Serif',serif;font-weight:400;font-size:44px;line-height:1.1}
+.grid2e{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px;align-items:start}
+.hist{padding:12px 0;border-bottom:1px solid var(--line)}
+.hist-top{display:flex;justify-content:space-between;color:var(--mut);font-size:13px}
+.hist-top b{color:var(--tx)}
+.hist-items{margin-top:4px;font-size:15px}
+.pay-row{display:flex;align-items:center;gap:12px;padding:12px 0;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.pay-row .grow{flex:1;min-width:180px} .pay-row small{color:var(--mut)}
+.pay-row code{font-family:ui-monospace,monospace;color:var(--acc2)}
+.pay-step .muted{font-size:14px;margin:0 0 14px}
+.qr{display:grid;place-items:center;margin:16px 0 8px}
+.qr img{background:#fff;border-radius:16px;padding:10px;width:240px;height:240px}
+.qr-ph{width:240px;height:240px;border:2px dashed var(--line2);border-radius:16px;display:grid;place-items:center;text-align:center;color:var(--mut);padding:20px;font-size:14px}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;max-width:1100px;margin:30px auto 0;padding:0 clamp(16px,4vw,40px)}
+.step{background:var(--s1);border:1px solid var(--line);border-radius:20px;padding:22px}
+.step h3{margin:10px 0 6px;font-size:18px} .step p{margin:0;color:var(--mut);font-size:14px;line-height:1.5}
+.step-n{width:30px;height:30px;border-radius:50%;display:grid;place-items:center;background:rgba(255,159,28,.12);color:var(--acc);font-weight:700}
+.foot{display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;max-width:1100px;margin:60px auto 0;padding:18px clamp(16px,4vw,40px);border-top:1px solid var(--line);color:var(--mut);font-size:13px}
+.gate{min-height:100vh;display:grid;place-items:center;padding:20px;position:relative}
+.gate-card{background:var(--s1);border:1px solid var(--line);border-radius:24px;padding:30px;width:min(380px,100%);display:flex;flex-direction:column;gap:14px;position:relative}
+.gate-card h1{font-family:'Instrument Serif',serif;font-weight:400;font-size:38px;margin:8px 0 0}
+.demo-tag{font-size:12px;color:var(--acc2);background:rgba(255,159,28,.08);border:1px solid var(--line2);border-radius:10px;padding:6px 10px}
+.badge{font-style:normal;background:var(--acc);color:#1b0e00;border-radius:99px;font-size:11px;font-weight:800;padding:1px 7px;margin-left:auto}
+.shop-row{display:flex;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.shop-row .grow small{color:var(--mut)} .strike{text-decoration:line-through;color:var(--mut)}
+.shop-row input[type=checkbox]{accent-color:var(--acc);width:18px;height:18px;vertical-align:middle;margin-right:6px}
+.contact-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap;margin:8px 0 12px;color:var(--mut);font-size:13px}
+.contact-row b{color:var(--acc2);letter-spacing:.12em}
+.form-stack.flat{padding:0}
+.paynow{width:100%;justify-content:center;margin-top:6px;text-decoration:none}
+.center{text-align:center;display:block;margin-top:10px}
+.poster{background:#fff;color:#111;border-radius:24px;padding:40px;max-width:560px;margin:0 auto;text-align:center}
+.poster-shop{font-family:'Instrument Serif',serif;font-size:34px}
+.poster h2{margin:6px 0 14px;font-size:24px}
+.poster img{width:min(100%,360px);height:auto}
+.poster p{color:#333;line-height:1.5} .poster code{font-size:13px;color:#555}
+.thanks{text-align:center;padding:60px 0}
+.thanks-tick{width:96px;height:96px;border-radius:50%;margin:0 auto 18px;display:grid;place-items:center;font-size:48px;color:#06150d;background:var(--ok);box-shadow:0 0 60px rgba(61,220,151,.4);animation:pop .5s}
+.thanks h1{font-size:clamp(44px,8vw,80px)!important}
+.thanks .lead{margin:0 auto 12px!important}
+.photo-btn{cursor:pointer}
+.selfie-row{display:flex;align-items:center;gap:14px;margin-bottom:12px}
+.selfie-row img,.selfie{width:64px;height:64px;border-radius:14px;object-fit:cover;border:1px solid var(--line2);display:block}
+.selfie.ph{background:var(--s2)}
+@media print{
+  body{background:#fff!important}
+  .side,.no-print,.glow{display:none!important}
+  .admin{display:block}.admin-main{padding:0!important}
+  .poster{border-radius:0;max-width:none;padding:30px}
+}
+@media(max-width:900px){
+  .grid2e{grid-template-columns:minmax(0,1fr)}
+  .bal b{font-size:34px}
+}
+
 @media(max-width:900px){
   .console-grid{grid-template-columns:minmax(0,1fr);height:auto}
   .console-grid>*,.admin>*{min-width:0}
