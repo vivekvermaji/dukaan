@@ -31,7 +31,18 @@ const owner = (base: string, mode: 'local' | 'remote') => (
   </Route>
 )
 
+const OWNER_SITE = import.meta.env.VITE_APP === 'owner'
+
 export default function App() {
+  if (OWNER_SITE) {
+    return (
+      <BrowserRouter>
+        <Routes>
+            <Route path="*" element={<Navigate to="/malik" replace />} />
+        </Routes>
+      </BrowserRouter>
+    )
+  }
   return (
     <BrowserRouter>
       <Routes>
@@ -40,7 +51,6 @@ export default function App() {
           <Route path="hisaab" element={<Hisaab />} />
           <Route path="pay" element={<Pay />} />
         </Route>
-        {owner('/malik', 'remote')}
         {owner('/demo', 'local')}
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
