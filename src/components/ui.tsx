@@ -1,9 +1,11 @@
 import { NavLink, Link, Outlet } from 'react-router-dom'
 import { useCountUp } from '../lib/hooks'
 import { rupee } from '../lib/engine'
+import { useBase } from '../lib/base'
+import { usePendingCount } from '../lib/pending'
 
-export function Logo() {
-  return <Link to="/" className="logo"><span className="logo-mark">द</span><span>Dukaan</span></Link>
+export function Logo({ to = '/' }: { to?: string }) {
+  return <Link to={to} className="logo"><span className="logo-mark">द</span><span>Dukaan</span></Link>
 }
 
 export function PublicShell() {
@@ -13,9 +15,8 @@ export function PublicShell() {
       <header className="topnav">
         <Logo />
         <nav>
-          <NavLink to="/app">Voice agent</NavLink>
-          <NavLink to="/admin">Admin panel</NavLink>
-          <a href="https://github.com/vivekvermaji/dukaan" target="_blank" rel="noreferrer">GitHub</a>
+          <NavLink to="/hisaab">Mera hisaab</NavLink>
+          <NavLink to="/pay">Payment</NavLink>
         </nav>
       </header>
       <Outlet />
@@ -23,19 +24,25 @@ export function PublicShell() {
   )
 }
 
-export function AdminShell() {
-  const links: [string, string, string][] = [['/admin', 'Dashboard', '◧'], ['/admin/khata', 'Udhaar khata', '₹'], ['/admin/stock', 'Stock', '▦'], ['/admin/log', 'Voice log', '◉']]
+export function AdminShell({ demo }: { demo?: boolean }) {
+  const base = useBase()
+  const pending = usePendingCount(!demo)
+  const links: [string, string, string, number?][] = [
+    [base, 'Dashboard', '◧'], [base + '/khata', 'Udhaar khata', '₹'], [base + '/payments', 'Payments', '✓', pending],
+    [base + '/stock', 'Stock', '▦'], [base + '/restock', 'Lana hai', '+'], [base + '/log', 'Voice log', '◉'], [base + '/qr', 'Print QR', '▣'], [base + '/settings', 'Settings', '⚙'],
+  ]
   return (
     <div className="admin">
       <div className="glow g1" />
       <aside className="side">
-        <Logo />
+        <Logo to={base} />
+        {demo && <div className="demo-tag">Demo sandbox · data sirf is browser me</div>}
         <nav>
-          {links.map(([to, label, ic]) => (
-            <NavLink key={to} to={to} end={to === '/admin'}><i>{ic}</i>{label}</NavLink>
+          {links.map(([to, label, ic, n]) => (
+            <NavLink key={to} to={to} end={to === base}><i>{ic}</i>{label}{n ? <em className="badge">{n}</em> : null}</NavLink>
           ))}
         </nav>
-        <Link to="/app" className="side-cta"><span className="dot live" />Voice agent kholo</Link>
+        <Link to={base + '/voice'} className="side-cta"><span className="dot live" />Voice agent kholo</Link>
       </aside>
       <main className="admin-main"><Outlet /></main>
     </div>
