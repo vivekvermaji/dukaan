@@ -20,6 +20,15 @@ export default function CustomerGate({ title, lead, children }: { title: string;
   }, [])
   useEffect(() => { const c = saved(); if (c) fetchIt(c).catch(() => { sessionStorage.removeItem(KEY); setCreds(null) }) }, [fetchIt])
 
+  // Owner edits show up here without a manual refresh.
+  useEffect(() => {
+    if (!creds) return
+    const tick = () => { if (!document.hidden) fetchIt(creds).catch(() => { /* keep showing the last good data */ }) }
+    const t = setInterval(tick, 8000)
+    document.addEventListener('visibilitychange', tick)
+    return () => { clearInterval(t); document.removeEventListener('visibilitychange', tick) }
+  }, [creds, fetchIt])
+
   const submit = async (e: React.FormEvent) => {
     e.preventDefault(); setBusy(true); setErr('')
     try { await fetchIt({ phone: phone.replace(/\D/g, '').slice(-10), code: code.trim() }) } catch (x) { setErr((x as Error).message) } finally { setBusy(false) }
