@@ -90,7 +90,11 @@ MIT. See [LICENSE](LICENSE).
 
 Privacy note: photo sirf owner ke liye server par rakhi jaati hai. Auto-delete abhi nahi hai, to payment confirm hone ke baad owner ko purani photos khud hata deni chahiye. Production me customer ko batakar consent lena aur retention limit lagana chahiye.
 
-## Do sites: public + owner panel
+## Two sites: public + owner panel
 
 1. Public site: deploy this repo normally. Env vars: `ADMIN_PIN`, `OPENROUTER_API_KEY`, `OPENROUTER_MODELS`, and `ALLOWED_ORIGIN` (the owner panel's URL, e.g. `https://your-panel.netlify.app`).
 2. Owner panel: create a second Netlify site from the same repo with env vars `VITE_APP=owner`, `VITE_API_BASE=https://<public-site>`, `VITE_PUBLIC_URL=https://<public-site>`, `VITE_API_URL=https://<public-site>/api/agent`. Share its URL only with the owner. Login with `ADMIN_PIN` at `/malik`.
+
+## Saathi (owner chat)
+
+Panel me `Saathi (chat)` page: owner simple Hinglish me pooch sakta hai "Aaj kya hua?" aur jawab khate ke asli data se aata hai (sale, udhaar diya, kisne paise diye, kam stock, pending payments). Owner jo bole ("Sunita ne 200 diye, 2 doodh udhaar gaya") wo chhoti commands me tootkar wahi parser/engine se khate me likha jata hai, har entry Undo ho sakti hai. AI model free OpenRouter se, band ho toh offline summary aur parser chalta hai. Model ko sirf ek chhota text summary jaati hai, photo ya UTR nahi.
