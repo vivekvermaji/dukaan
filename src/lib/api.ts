@@ -9,7 +9,7 @@ async function call<T>(op: string, opts: { method?: string; body?: unknown; auth
   if (opts.auth) headers.authorization = 'Bearer ' + getToken()
   const r = await fetch((import.meta.env.VITE_API_BASE || '') + '/api/shop?op=' + op, { method: opts.method ?? (opts.body ? 'POST' : 'GET'), headers, body: opts.body ? JSON.stringify(opts.body) : undefined })
   const data = await r.json().catch(() => ({}))
-  if (!r.ok) throw Object.assign(new Error(data.error || 'Request fail ho gayi'), { status: r.status })
+  if (!r.ok) throw Object.assign(new Error(data.error || 'Request fail ho gayi'), { status: r.status, data })
   return data as T
 }
 
@@ -26,8 +26,8 @@ export const api = {
   pay: (phone: string, code: string, amount: number, utr: string, photo: string) => call<{ ok: true; id?: string }>('pay', { body: { phone, code, amount, utr, photo } }),
   photo: (id: string) => call<{ photo: string }>('photo&id=' + id, { auth: true }),
   login: (pin: string) => call<{ token: string }>('login', { body: { pin } }),
-  getState: () => call<{ state: State | null }>('state', { auth: true }),
-  putState: (state: State) => call<{ ok: true }>('state', { method: 'PUT', body: { state }, auth: true }),
+  getState: () => call<{ state: State | null; rev: number }>('state', { auth: true }),
+  putState: (state: State, rev: number) => call<{ ok: true; rev: number }>('state', { method: 'PUT', body: { state, rev }, auth: true }),
   payments: () => call<{ payments: Payment[] }>('payments', { auth: true }),
   resolve: (id: string, status: 'confirmed' | 'rejected') => call<{ ok: true }>('resolve', { body: { id, status }, auth: true }),
   setConfig: (c: ShopConfig) => call<{ ok: true }>('config', { method: 'PUT', body: c, auth: true }),
