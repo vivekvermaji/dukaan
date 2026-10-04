@@ -83,3 +83,9 @@ api/agent.ts        Vercel version of the AI proxy
 ## License
 
 MIT. See [LICENSE](LICENSE).
+
+## Photo aur thank-you screen
+
+`/pay` par QR dikhne se pehle customer apni photo khinchta hai (device camera). Photo pending payment ke saath owner ke inbox (`/malik/payments`) me dikhti hai, taaki fake payment par pehchaan ho sake. UTR submit hone ke baad "Thank you sir, visit our shop again" screen aati hai.
+
+Privacy note: photo sirf owner ke liye server par rakhi jaati hai. Auto-delete abhi nahi hai, to payment confirm hone ke baad owner ko purani photos khud hata deni chahiye. Production me customer ko batakar consent lena aur retention limit lagana chahiye.
