@@ -14,11 +14,10 @@ const CLAIM = /(add (kar|ho)|likh (diya|liya|di|dia)|note (kar|ho)|daal (diya|di
 /** Read the saved shop back from the server so "likh diya" is never claimed unless it really landed. */
 async function verifySaved(): Promise<string | null> {
   await flushPush()
-  if (syncStatus.error) return 'Server pe save NAHI hua (' + syncStatus.error + '). Page refresh karke dobara try karo.'
+  if (syncStatus.error) return 'Save NAHI hua: ' + syncStatus.error
   try {
     const r = await api.getState()
-    const mine = getState()
-    if (!r.state || r.state.customers.length !== mine.customers.length || r.state.ledger.length !== mine.ledger.length || r.state.sales.length !== mine.sales.length) return 'Server pe save NAHI hua. Page refresh karke dobara try karo.'
+    if (r.rev !== syncStatus.rev) return 'Save NAHI hua. Page refresh karke dobara try karo.'
   } catch (e) { return 'Save check nahi ho paya (' + (e as Error).message + ').' }
   return null
 }
