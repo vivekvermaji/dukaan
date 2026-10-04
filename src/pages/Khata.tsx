@@ -8,6 +8,7 @@ export default function Khata() {
   const [open, setOpen] = useState<string | null>(null)
   const [q, setQ] = useState('')
   const [name, setName] = useState('')
+  const [phone, setPhone] = useState('')
   const list = [...s.customers].filter((c) => c.name.toLowerCase().includes(q.toLowerCase())).sort((a, b) => b.balance - a.balance)
   const total = s.customers.reduce((a, c) => a + Math.max(0, c.balance), 0)
 
@@ -24,8 +25,8 @@ export default function Khata() {
   const addCustomer = (e: React.FormEvent) => {
     e.preventDefault()
     const n = name.trim(); if (!n) return
-    mutate((d) => { d.customers.push({ id: 'c-' + uid(), name: n, hi: n, aliases: n.toLowerCase().split(/\s+/), balance: 0, since: Date.now() }) })
-    setName('')
+    mutate((d) => { d.customers.push({ id: 'c-' + uid(), name: n, hi: n, aliases: n.toLowerCase().split(/\s+/), balance: 0, since: Date.now(), phone: phone.replace(/\D/g, '').slice(-10), code: String(1000 + Math.floor(Math.random() * 9000)) }) })
+    setName(''); setPhone('')
   }
   const remind = (c: { name: string; balance: number }) =>
     `https://wa.me/?text=${encodeURIComponent(`Namaste ${c.name.split(' ')[0]} ji, aapka ${rupee(c.balance)} humare yaha baaki hai. Jab suvidha ho, de dijiye. Dhanyavaad 🙏`)}`
@@ -53,6 +54,10 @@ export default function Khata() {
                     <button className="btn sm" disabled={c.balance <= 0} onClick={() => settle(c.id)}>Poora chuka diya</button>
                     <a className={`btn sm ghost ${c.balance <= 0 ? 'disabled' : ''}`} href={c.balance > 0 ? remind(c) : undefined} target="_blank" rel="noreferrer">WhatsApp reminder</a>
                   </div>
+                  <div className="contact-row">
+                    <span>Khata code (customer ko batao): <b>{c.code ?? '—'}</b></span>
+                    <input placeholder="Phone number (10 ank)" inputMode="numeric" value={c.phone ?? ''} onChange={(e) => mutate((d) => { d.customers.find((x) => x.id === c.id)!.phone = e.target.value.replace(/\D/g, '').slice(-10) })} />
+                  </div>
                   {entries.map((e) => (
                     <div key={e.id} className="ledger-line">
                       <span>{new Date(e.ts).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })} · {clock(e.ts)}</span>
@@ -69,6 +74,7 @@ export default function Khata() {
       </div>
       <form className="inline-form" onSubmit={addCustomer}>
         <input placeholder="Naya customer ka naam" value={name} onChange={(e) => setName(e.target.value)} />
+        <input placeholder="Phone (optional)" inputMode="numeric" value={phone} onChange={(e) => setPhone(e.target.value)} />
         <button className="btn sm" type="submit">Khata kholo</button>
       </form>
     </>
