@@ -1,5 +1,5 @@
 // Netlify function. The OpenRouter key lives only in the OPENROUTER_API_KEY environment variable.
-const MODELS = (process.env.OPENROUTER_MODELS || 'nvidia/nemotron-3-ultra-550b-a55b:free,nvidia/nemotron-3-super-120b-a12b:free,google/gemma-4-31b-it:free,qwen/qwen3.8-27b:free').split(',')
+const getModels = () => (process.env.OPENROUTER_MODELS || 'nvidia/nemotron-3-ultra-550b-a55b:free,nvidia/nemotron-3-super-120b-a12b:free,google/gemma-4-31b-it:free,qwen/qwen3.8-27b:free').split(',')
 
 const SYSTEM = `You are the brain of "Dukaan", a voice assistant for Indian kirana shopkeepers. The user speaks Hindi/Hinglish.
 Convert the utterance into ONE JSON object, nothing else. Schema:
@@ -38,7 +38,7 @@ export default async (req) => {
     if (typeof message !== 'string' || message.length > 500 || typeof digest !== 'string' || digest.length > 4000) return json({ error: 'bad input' }, 400)
     const hist = (Array.isArray(history) ? history : []).slice(-6).map((h) => `${h.who === 'me' ? 'Owner' : 'Saathi'}: ${String(h.text).slice(0, 300)}`).join('\n')
     const user = `FACTS:\n${digest}\n\nItems: ${JSON.stringify((items || []).slice(0, 60))}\nCustomers: ${JSON.stringify((customers || []).slice(0, 60))}\n\nChat so far:\n${hist}\n\nOwner: ${message}`
-    for (const model of MODELS) {
+    for (const model of getModels()) {
       try {
         const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
           method: 'POST',
@@ -60,7 +60,7 @@ export default async (req) => {
   const { utterance, items, customers, today } = body || {}
   if (typeof utterance !== 'string' || utterance.length > 300) return json({ error: 'bad input' }, 400)
   const user = `Items: ${JSON.stringify((items || []).slice(0, 60))}\nCustomers: ${JSON.stringify((customers || []).slice(0, 60))}\nToday: ${today}\nUtterance: ${utterance}`
-  for (const model of MODELS) {
+  for (const model of getModels()) {
     try {
       const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
