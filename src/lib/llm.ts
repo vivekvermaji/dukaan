@@ -28,3 +28,23 @@ export async function probeLLM() {
   try { const r = await fetch(API, { method: 'GET' }); const j = await r.json().catch(() => null); available = r.ok && j?.ok === true } catch { available = false }
   return available
 }
+
+export type SaathiReply = { reply: string; actions: string[] }
+/** Friendly owner chat: explains the day in simple Hinglish and can turn "aaj ye ye hua" into short commands. */
+export async function askSaathi(message: string, digest: string, history: { who: 'me' | 'bot'; text: string }[], b: Books): Promise<SaathiReply> {
+  const ctrl = new AbortController()
+  const t = setTimeout(() => ctrl.abort(), 25000)
+  try {
+    const r = await fetch(API, {
+      method: 'POST', headers: { 'content-type': 'application/json' }, signal: ctrl.signal,
+      body: JSON.stringify({
+        mode: 'saathi', message, digest, history: history.slice(-6),
+        items: b.items.map((i) => i.name), customers: b.customers.map((c) => c.name),
+      }),
+    })
+    if (!r.ok) throw new Error('saathi ' + r.status)
+    const j = await r.json()
+    if (typeof j?.reply !== 'string') throw new Error('saathi bad reply')
+    return j
+  } finally { clearTimeout(t) }
+}
