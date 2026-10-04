@@ -3,7 +3,7 @@
 A Hindi / Hinglish voice agent for Indian kirana shopkeepers, with a live admin panel.
 Built for the **Amazon Developer Hackathon, Alexa+ track** (simulated Alexa+ style experience in a web app).
 
-**Live demo: https://dukaan-voice.netlify.app** (voice agent at `/app`, admin panel at `/admin`)
+**Live demo: https://dukaan-voice.pages.dev** (Cloudflare Pages + D1). Netlify mirror: https://dukaan-voice.netlify.app
 
 The shopkeeper's hands are busy. They talk, Dukaan acts:
 
@@ -29,7 +29,7 @@ Devanagari works too: "रमेश का 500 उधार लिख दो", "
 - **Actions are real:** the agent changes the books (sales, udhaar ledger, stock). Every action is shown as a card and can be undone.
 - **Owner panel:** a separate deployment of the same repo (build flag `VITE_APP=owner`), PIN login, talks to the public site's API so both share one data store. The public site has no owner routes. `/demo` on the public site (same screens on browser-only sample data, no login, for reviewers). Pages: dashboard, udhaar khata, payments, stock, "lana hai" shopping list, voice log, printable QR, settings. Nothing on the public site links to the owner panel.
 - **Public customer site:** `/` home, `/hisaab` (customer enters phone number plus the 4-digit khata code the owner gave them, then sees balance, items taken and every entry), `/pay` (UPI QR, "Pay now" deep link, UTR form).
-- **Shared data:** Netlify Functions + Netlify Blobs (free). The owner's voice commands write to the same data customers read. Customer lookups reveal only that one customer's record.
+- **Shared data:** Cloudflare Pages Functions + D1 (free), with a Netlify Functions + Blobs version kept as a fallback. The owner's voice commands write to the same data customers read. Customer lookups reveal only that one customer's record.
 
 ## Payments: what is verified and what is not
 
@@ -56,7 +56,7 @@ npm run dev
 
 Open http://localhost:5173. Without an API key the app runs on the offline parser only.
 
-## Deploy (Netlify, free)
+## Deploy (Cloudflare Pages + D1, free; Netlify also works)
 
 1. Import this repo in Netlify. `netlify.toml` already sets the build, the functions and the redirects.
 2. Add environment variables (Site configuration, Environment variables):
@@ -94,6 +94,8 @@ Privacy note: photo sirf owner ke liye server par rakhi jaati hai. Auto-delete a
 
 1. Public site: deploy this repo normally. Env vars: `ADMIN_PIN`, `OPENROUTER_API_KEY`, `OPENROUTER_MODELS`, and `ALLOWED_ORIGIN` (the owner panel's URL, e.g. `https://your-panel.netlify.app`).
 2. Owner panel: create a second Netlify site from the same repo with env vars `VITE_APP=owner`, `VITE_API_BASE=https://<public-site>`, `VITE_PUBLIC_URL=https://<public-site>`, `VITE_API_URL=https://<public-site>/api/agent`. Share its URL only with the owner. Login with `ADMIN_PIN` at `/malik`.
+
+Cloudflare Pages: create two Pages projects from this repo (build `npm run build`, output `dist`), bind one D1 database as `DB` on the public project, enable the `nodejs_compat` flag, and set the same env vars. The `functions/` folder serves `/api/shop` and `/api/agent`.
 
 ## Saathi (owner chat)
 
