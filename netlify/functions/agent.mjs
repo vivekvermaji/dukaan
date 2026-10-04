@@ -14,6 +14,13 @@ Convert the utterance into ONE JSON object, nothing else. Schema:
 Meanings: sale=goods sold (credit=true if sold on udhaar to a named customer); udhaar=add money owed by customer; payment=customer paid back money; stock_in=new stock arrived; q_*=questions about sales/udhaar/stock; undo=cancel last action.
 Use "chat" only for general shop advice or small talk; keep reply under 25 words. If unclear use "unknown". Never invent items or amounts.`
 
+const SAATHI = `You are "Saathi", a warm, friendly helper for an Indian kirana shop owner. Talk like a trusted young helper in simple Hinglish (Roman letters), short sentences, no jargon, no markdown, at most 90 words.
+You get FACTS about the shop (never invent numbers, only use FACTS) and the owner's message.
+Reply with ONE JSON object only: {"reply":"...","actions":["..."]}.
+- reply: your answer. If the owner asks how the day went, explain from FACTS: sale, udhaar given, who paid, low stock, pending payments. End with one useful tip or question when natural.
+- actions: ONLY when the owner reports things that happened and want them recorded (sales, udhaar given, payment received, stock arrived). Each action is one short plain command in Hinglish that a parser understands, e.g. "2 doodh aur 1 bread becho", "Ramesh ka 500 udhaar likh do", "Sunita ne 200 diye", "50 packet Maggi aaya". Use exact item and customer names from the lists. Max 5. If the owner only asks or chats, actions must be [].
+- If something is unclear (which customer, how much), ask a short question in reply and keep actions [].`
+
 const json = (obj, status = 200) =>
   new Response(JSON.stringify(obj), { status, headers: { 'content-type': 'application/json', 'access-control-allow-origin': '*' } })
 
@@ -25,6 +32,30 @@ export default async (req) => {
   if (!key) return json({ error: 'LLM not configured' }, 503)
   let body
   try { body = await req.json() } catch { return json({ error: 'bad json' }, 400) }
+  if (body && body.mode === 'saathi') {
+    const { message, digest, history, items, customers } = body
+    if (typeof message !== 'string' || message.length > 500 || typeof digest !== 'string' || digest.length > 4000) return json({ error: 'bad input' }, 400)
+    const hist = (Array.isArray(history) ? history : []).slice(-6).map((h) => `${h.who === 'me' ? 'Owner' : 'Saathi'}: ${String(h.text).slice(0, 300)}`).join('\n')
+    const user = `FACTS:\n${digest}\n\nItems: ${JSON.stringify((items || []).slice(0, 60))}\nCustomers: ${JSON.stringify((customers || []).slice(0, 60))}\n\nChat so far:\n${hist}\n\nOwner: ${message}`
+    for (const model of MODELS) {
+      try {
+        const r = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+          method: 'POST',
+          headers: { authorization: `Bearer ${key}`, 'content-type': 'application/json', 'x-title': 'Dukaan' },
+          body: JSON.stringify({ model, temperature: 0.4, max_tokens: 500, messages: [{ role: 'system', content: SAATHI }, { role: 'user', content: user }] }),
+        })
+        if (!r.ok) continue
+        const j = await r.json()
+        const text = (j.choices && j.choices[0] && j.choices[0].message && j.choices[0].message.content) || ''
+        const m = text.match(/\{[\s\S]*\}/)
+        if (!m) continue
+        const o = JSON.parse(m[0])
+        if (typeof o.reply !== 'string') continue
+        return json({ reply: o.reply.slice(0, 700), actions: (Array.isArray(o.actions) ? o.actions : []).filter((a) => typeof a === 'string').slice(0, 5).map((a) => a.slice(0, 120)) })
+      } catch (e) { /* next model */ }
+    }
+    return json({ error: 'all models failed' }, 502)
+  }
   const { utterance, items, customers, today } = body || {}
   if (typeof utterance !== 'string' || utterance.length > 300) return json({ error: 'bad input' }, 400)
   const user = `Items: ${JSON.stringify((items || []).slice(0, 60))}\nCustomers: ${JSON.stringify((customers || []).slice(0, 60))}\nToday: ${today}\nUtterance: ${utterance}`
