@@ -35,7 +35,7 @@ let state: State = load()
 const listeners = new Set<() => void>()
 let remote = false
 let pushTimer: ReturnType<typeof setTimeout> | undefined
-export const syncStatus = { error: '' as string }
+export const syncStatus = { error: '' as string, rev: 0, inFlight: false }
 const save = () => {
   if (remote) {
     clearTimeout(pushTimer)
@@ -47,14 +47,34 @@ const save = () => {
 export async function flushPush() {
   clearTimeout(pushTimer)
   if (!remote) return
-  try { await api.putState(state); syncStatus.error = '' } catch (e) { syncStatus.error = (e as Error).message }
+  syncStatus.inFlight = true
+  try {
+    const r = await api.putState(state, syncStatus.rev)
+    syncStatus.rev = r.rev; syncStatus.error = ''
+  } catch (e) {
+    const err = e as { message: string; status?: number; data?: { state?: State; rev?: number } }
+    if (err.status === 409 && err.data?.state) {
+      // Another device saved first. Take its data so nothing is silently overwritten.
+      state = err.data.state; syncStatus.rev = err.data.rev ?? 0
+      syncStatus.error = 'Doosre device se naya data aaya, wo load kar liya. Apna kaam dobara karo.'
+    } else syncStatus.error = err.message
+  } finally { syncStatus.inFlight = false }
   listeners.forEach((l) => l())
+}
+/** Pick up edits made on another device (or the other site) when this one has nothing waiting to save. */
+export async function pullRemote() {
+  if (!remote || pushTimer || syncStatus.inFlight) return
+  try {
+    const r = await api.getState()
+    if (r.state && r.rev !== syncStatus.rev && !pushTimer && !syncStatus.inFlight) { state = r.state; syncStatus.rev = r.rev; listeners.forEach((l) => l()) }
+  } catch { /* try again next tick */ }
 }
 const emit = () => { save(); listeners.forEach((l) => l()) }
 
 /** Switch between the browser-only demo sandbox and the shared (server) shop data. */
-export function setBackend(mode: 'local' | 'remote', initial?: State) {
+export function setBackend(mode: 'local' | 'remote', initial?: State, rev = 0) {
   remote = mode === 'remote'
+  syncStatus.rev = rev
   state = remote ? (initial ?? fresh()) : load()
   listeners.forEach((l) => l())
 }
