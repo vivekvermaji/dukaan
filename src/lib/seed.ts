@@ -25,14 +25,15 @@ export const seedItems = (): Item[] => [
 const C = (id: string, name: string, hi: string, aliases: string[], balance: number, daysAgo: number): Customer =>
   ({ id, name, hi, aliases, balance, since: Date.now() - daysAgo * 86400000 })
 
-export const seedCustomers = (): Customer[] => [
+const withContact = (cs: Customer[]): Customer[] => cs.map((c, i) => ({ ...c, phone: `12345000${10 + i}`, code: String(2041 + i * 313).slice(0, 4) }))
+export const seedCustomers = (): Customer[] => withContact([
   C('ramesh-gupta', 'Ramesh Gupta', 'रमेश गुप्ता', ['ramesh', 'gupta', 'रमेश', 'गुप्ता'], 1250, 90),
   C('ramesh-sharma', 'Ramesh Sharma', 'रमेश शर्मा', ['ramesh', 'sharma', 'रमेश', 'शर्मा'], 400, 60),
   C('sunita', 'Sunita Devi', 'सुनीता देवी', ['sunita', 'devi', 'सुनीता', 'देवी'], 780, 120),
   C('mohan', 'Mohan Lal', 'मोहन लाल', ['mohan', 'lal', 'मोहन', 'लाल'], 2100, 200),
   C('pooja', 'Pooja Verma', 'पूजा वर्मा', ['pooja', 'puja', 'verma', 'पूजा', 'वर्मा'], 0, 30),
   C('imran', 'Imran Khan', 'इमरान खान', ['imran', 'khan', 'इमरान', 'खान'], 340, 45),
-]
+])
 
 // Deterministic pseudo-random so the sample shop looks the same on every reset.
 function rng(seed: number) {
