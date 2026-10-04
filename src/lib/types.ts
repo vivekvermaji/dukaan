@@ -1,5 +1,5 @@
 export type Item = { id: string; name: string; hi: string; aliases: string[]; price: number; qty: number; reorder: number; unit: string }
-export type Customer = { id: string; name: string; hi: string; aliases: string[]; balance: number; since: number }
+export type Customer = { id: string; name: string; hi: string; aliases: string[]; balance: number; since: number; phone?: string; code?: string }
 export type SaleLine = { itemId: string; qty: number; price: number }
 export type Sale = { id: string; ts: number; lines: SaleLine[]; total: number; customerId?: string; credit?: boolean }
 export type LedgerEntry = { id: string; ts: number; customerId: string; amount: number; kind: 'udhaar' | 'payment'; note?: string }
@@ -8,7 +8,10 @@ export type LogEntry = {
   ok: boolean; source: 'rules' | 'llm' | 'system'; undone?: boolean; undoable?: boolean
 }
 export type Books = { items: Item[]; customers: Customer[]; sales: Sale[]; ledger: LedgerEntry[] }
-export type State = Books & { log: LogEntry[]; snapshots: string[] }
+export type ShoppingItem = { id: string; name: string; qty: string; done: boolean }
+export type State = Books & { log: LogEntry[]; snapshots: string[]; shopping?: ShoppingItem[] }
+export type Payment = { id: string; customerId: string; name: string; amount: number; utr: string; ts: number; status: 'pending' | 'confirmed' | 'rejected'; resolvedTs?: number; hasPhoto?: boolean }
+export type ShopConfig = { shop: string; payee: string; upiId: string }
 
 export type Intent =
   | { type: 'sale'; lines: { itemId: string; qty: number }[]; customerId?: string; credit?: boolean }
