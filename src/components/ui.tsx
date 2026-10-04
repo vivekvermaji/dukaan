@@ -29,7 +29,7 @@ export function AdminShell({ demo }: { demo?: boolean }) {
   const pending = usePendingCount(!demo)
   const links: [string, string, string, number?][] = [
     [base, 'Dashboard', '◧'], [base + '/khata', 'Udhaar khata', '₹'], [base + '/payments', 'Payments', '✓', pending],
-    [base + '/stock', 'Stock', '▦'], [base + '/restock', 'Lana hai', '+'], [base + '/log', 'Voice log', '◉'], [base + '/qr', 'Print QR', '▣'], [base + '/settings', 'Settings', '⚙'],
+    [base + '/saathi', 'Saathi (chat)', '✦'], [base + '/stock', 'Stock', '▦'], [base + '/restock', 'Lana hai', '+'], [base + '/log', 'Voice log', '◉'], [base + '/qr', 'Print QR', '▣'], [base + '/settings', 'Settings', '⚙'],
   ]
   return (
     <div className="admin">
