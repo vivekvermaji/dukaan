@@ -3,6 +3,8 @@
 A Hindi / Hinglish voice agent for Indian kirana shopkeepers, with a live admin panel.
 Built for the **Amazon Developer Hackathon, Alexa+ track** (simulated Alexa+ style experience in a web app).
 
+**Live demo: https://dukaan-voice.netlify.app** (voice agent at `/app`, admin panel at `/admin`)
+
 The shopkeeper's hands are busy. They talk, Dukaan acts:
 
 | Say | What happens |
