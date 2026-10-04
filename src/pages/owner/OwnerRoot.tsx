@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Outlet } from 'react-router-dom'
 import { BaseCtx } from '../../lib/base'
 import { api, getToken, setToken } from '../../lib/api'
-import { flushPush, setBackend } from '../../lib/store'
+import { flushPush, pullRemote, setBackend, useStore, syncStatus } from '../../lib/store'
 import { Logo } from '../../components/ui'
 
 type Phase = 'loading' | 'login' | 'ready'
@@ -13,7 +13,7 @@ export default function OwnerRoot({ base, mode }: { base: string; mode: 'local' 
   const load = () => {
     setPhase('loading')
     api.getState()
-      .then((r) => { setBackend('remote', r.state ?? undefined); if (!r.state) void flushPush(); setPhase('ready') })
+      .then((r) => { setBackend('remote', r.state ?? undefined, r.rev); if (!r.state) void flushPush(); setPhase('ready') })
       .catch(() => { setToken(''); setPhase('login') })
   }
   useEffect(() => {
@@ -21,9 +21,16 @@ export default function OwnerRoot({ base, mode }: { base: string; mode: 'local' 
     if (getToken()) load(); else setPhase('login')
   }, [mode]) // eslint-disable-line react-hooks/exhaustive-deps
 
+  useStore()
+  useEffect(() => {
+    if (mode !== 'remote' || phase !== 'ready') return
+    const t = setInterval(() => { void pullRemote() }, 6000)
+    return () => clearInterval(t)
+  }, [mode, phase])
+
   if (phase === 'loading') return <div className="gate"><div className="gate-card"><p className="muted">Khul raha hai…</p></div></div>
   if (phase === 'login') return <Login onDone={load} />
-  return <BaseCtx.Provider value={base}><Outlet /></BaseCtx.Provider>
+  return <BaseCtx.Provider value={base}>{mode === 'remote' && syncStatus.error && <div className="err" style={{ position: 'fixed', top: 8, left: '50%', transform: 'translateX(-50%)', zIndex: 50, background: '#2a1114', padding: '8px 14px', borderRadius: 12 }}>{syncStatus.error}</div>}<Outlet /></BaseCtx.Provider>
 }
 
 function Login({ onDone }: { onDone: () => void }) {
