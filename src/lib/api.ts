@@ -7,7 +7,7 @@ export const setToken = (t: string) => { try { t ? localStorage.setItem(TOKEN_KE
 async function call<T>(op: string, opts: { method?: string; body?: unknown; auth?: boolean } = {}): Promise<T> {
   const headers: Record<string, string> = { 'content-type': 'application/json' }
   if (opts.auth) headers.authorization = 'Bearer ' + getToken()
-  const r = await fetch('/api/shop?op=' + op, { method: opts.method ?? (opts.body ? 'POST' : 'GET'), headers, body: opts.body ? JSON.stringify(opts.body) : undefined })
+  const r = await fetch((import.meta.env.VITE_API_BASE || '') + '/api/shop?op=' + op, { method: opts.method ?? (opts.body ? 'POST' : 'GET'), headers, body: opts.body ? JSON.stringify(opts.body) : undefined })
   const data = await r.json().catch(() => ({}))
   if (!r.ok) throw Object.assign(new Error(data.error || 'Request fail ho gayi'), { status: r.status })
   return data as T
