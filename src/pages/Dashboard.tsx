@@ -1,3 +1,4 @@
+import { useBase } from '../lib/base'
 import { Link } from 'react-router-dom'
 import { useStore } from '../lib/store'
 import { rupee, salesIn } from '../lib/engine'
@@ -5,6 +6,7 @@ import { BarChart, Stat } from '../components/ui'
 import { ago, clock } from '../lib/hooks'
 
 export default function Dashboard() {
+  const base = useBase()
   const s = useStore()
   const today = salesIn(s, 'today')
   const week = salesIn(s, 'week')
@@ -39,7 +41,7 @@ export default function Dashboard() {
     <>
       <div className="page-head">
         <div><h1>Dashboard</h1><p>Sample dukaan · voice se jo bhi likhoge, yaha turant dikhega</p></div>
-        <Link to="/app" className="btn">🎙 Voice se kuch likho</Link>
+        <Link to={`${base}/voice`} className="btn">🎙 Voice se kuch likho</Link>
       </div>
       <div className="stats">
         <Stat label="Aaj ki sale" value={today.total} hint={`${today.sales.length} bill`} />
@@ -74,12 +76,12 @@ export default function Dashboard() {
           </div>
         </div>
         <div className="card">
-          <div className="card-title">Dhyan do <Link to="/admin/stock">Stock dekho →</Link></div>
+          <div className="card-title">Dhyan do <Link to={`${base}/stock`}>Stock dekho →</Link></div>
           {low.length === 0 && <div className="muted">Sab kuch theek stock me hai.</div>}
           {low.map((i) => (
             <div className="alert-row" key={i.id}><span>{i.name}</span><b className={i.qty === 0 ? 'bad' : 'warn'}>{i.qty} bacha</b></div>
           ))}
-          <div className="card-title" style={{ marginTop: 22 }}>Sabse zyada udhaar <Link to="/admin/khata">Khata →</Link></div>
+          <div className="card-title" style={{ marginTop: 22 }}>Sabse zyada udhaar <Link to={`${base}/khata`}>Khata →</Link></div>
           {[...s.customers].sort((a, b) => b.balance - a.balance).slice(0, 3).map((c) => (
             <div className="alert-row" key={c.id}><span>{c.name}</span><b className="warn">{rupee(c.balance)}</b></div>
           ))}
