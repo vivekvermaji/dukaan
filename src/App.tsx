@@ -13,12 +13,14 @@ import Payments from './pages/owner/Payments'
 import Restock from './pages/owner/Restock'
 import Settings from './pages/owner/Settings'
 import Poster from './pages/owner/Poster'
+import Saathi from './pages/owner/Saathi'
 
 // Owner area: /malik (PIN login, shared server data). /demo: same screens on browser-only sample data for reviewers.
 const owner = (base: string, mode: 'local' | 'remote') => (
   <Route path={base} element={<OwnerRoot base={base} mode={mode} />}>
     <Route element={<AdminShell demo={mode === 'local'} />}>
       <Route index element={<Dashboard />} />
+      <Route path="saathi" element={<Saathi />} />
       <Route path="khata" element={<Khata />} />
       <Route path="payments" element={<Payments />} />
       <Route path="stock" element={<Stock />} />
