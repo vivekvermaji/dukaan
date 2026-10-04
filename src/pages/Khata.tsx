@@ -53,6 +53,18 @@ export default function Khata() {
     addLog({ utterance: '(admin panel)', intent: 'delete', reply: 'Entry hata di', ok: true, source: 'system', undoable: true })
     void flushPush()
   }
+  const delCustomer = (c: { id: string; name: string; balance: number }) => {
+    const warn = c.balance > 0 ? ` Iska ${rupee(c.balance)} baaki hai, wo bhi hat jayega.` : ''
+    if (!window.confirm(`${c.name} ka poora khata hata dein?${warn}`)) return
+    pushSnapshot()
+    mutate((dr) => {
+      dr.customers = dr.customers.filter((x) => x.id !== c.id)
+      dr.ledger = dr.ledger.filter((x) => x.customerId !== c.id)
+    })
+    setOpen(null)
+    addLog({ utterance: '(admin panel)', intent: 'delete', reply: `${c.name} ka khata hata diya`, ok: true, source: 'system', undoable: true })
+    void flushPush()
+  }
   const addCustomer = (e: React.FormEvent) => {
     e.preventDefault()
     const n = name.trim(); if (!n) return
@@ -84,6 +96,7 @@ export default function Khata() {
                   <div className="khata-actions">
                     <button className="btn sm" disabled={c.balance <= 0} onClick={() => settle(c.id)}>Poora chuka diya</button>
                     <a className={`btn sm ghost ${c.balance <= 0 ? 'disabled' : ''}`} href={c.balance > 0 ? remind(c) : undefined} target="_blank" rel="noreferrer">WhatsApp reminder</a>
+                    <button className="btn sm ghost" onClick={() => delCustomer(c)}>Customer hatao</button>
                   </div>
                   <div className="contact-row">
                     <span>Khata code (customer ko batao): <b>{c.code ?? '—'}</b></span>
