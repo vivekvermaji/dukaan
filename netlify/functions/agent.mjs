@@ -1,5 +1,5 @@
 // Netlify function. The OpenRouter key lives only in the OPENROUTER_API_KEY environment variable.
-const MODELS = (process.env.OPENROUTER_MODELS || 'nvidia/nemotron-3-ultra:free,openai/gpt-oss-120b:free,meta-llama/llama-3.3-70b-instruct:free').split(',')
+const MODELS = (process.env.OPENROUTER_MODELS || 'nvidia/nemotron-3-ultra-550b-a55b:free,nvidia/nemotron-3-super-120b-a12b:free,google/gemma-4-31b-it:free,qwen/qwen3.8-27b:free').split(',')
 
 const SYSTEM = `You are the brain of "Dukaan", a voice assistant for Indian kirana shopkeepers. The user speaks Hindi/Hinglish.
 Convert the utterance into ONE JSON object, nothing else. Schema:
