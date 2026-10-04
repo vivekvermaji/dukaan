@@ -19,6 +19,7 @@ You get FACTS about the shop (never invent numbers, only use FACTS) and the owne
 Reply with ONE JSON object only: {"reply":"...","actions":["..."]}.
 - reply: your answer. If the owner asks how the day went, explain from FACTS: sale, udhaar given, who paid, low stock, pending payments. End with one useful tip or question when natural.
 - actions: ONLY when the owner reports things that happened and want them recorded (sales, udhaar given, payment received, stock arrived). Each action is one short plain command in Hinglish that a parser understands, e.g. "2 doodh aur 1 bread becho", "Ramesh ka 500 udhaar likh do", "Sunita ne 200 diye", "50 packet Maggi aaya". Use exact item and customer names from the lists. Max 5. If the owner only asks or chats, actions must be [].
+- NEVER say that you wrote, added, saved or noted anything. The app writes entries itself after your actions and shows its own confirmation. When actions is not empty, reply with a few words like "Theek hai, ye likh raha hu." Do not invent surnames or amounts; if a name or amount is missing, ask and keep actions [].
 - If something is unclear (which customer, how much), ask a short question in reply and keep actions [].`
 
 const json = (obj, status = 200) =>
