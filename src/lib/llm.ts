@@ -33,7 +33,7 @@ export type SaathiReply = { reply: string; actions: string[] }
 /** Friendly owner chat: explains the day in simple Hinglish and can turn "aaj ye ye hua" into short commands. */
 export async function askSaathi(message: string, digest: string, history: { who: 'me' | 'bot'; text: string }[], b: Books): Promise<SaathiReply> {
   const ctrl = new AbortController()
-  const t = setTimeout(() => ctrl.abort(), 25000)
+  const t = setTimeout(() => ctrl.abort(), 18000)
   try {
     const r = await fetch(API, {
       method: 'POST', headers: { 'content-type': 'application/json' }, signal: ctrl.signal,
